@@ -1,49 +1,26 @@
-# NEXO MVP
+# NEXO 2.0 — Prototipo funcional
 
-MVP web estático para probar NEXO desde un teléfono.
+NEXO 2.0 es una PWA de demostración de movilidad urbana. Esta versión está pensada para subir directamente a GitHub Pages y probarse desde un teléfono.
 
-## Principios del modelo
-- Las comisiones se generan únicamente a partir de ventas registradas.
-- No se pagan comisiones por crear cuentas, registrarse o reclutar personas.
-- El MVP usa una estructura de referidos de hasta 3 niveles: 5%, 2% y 1% sobre ventas.
-- Esta implementación es una DEMO: los datos viven en `localStorage`.
+## Incluye
+- Buscador origen/destino.
+- Destinos rápidos.
+- Cuatro alternativas de viaje.
+- Priorización por rapidez, precio o caminata.
+- Mapa OpenStreetMap/Leaflet.
+- Geolocalización del teléfono cuando el navegador la permite.
+- Panel lateral.
+- Diseño móvil.
+- PWA + caché básica.
+- Datos de demostración, sin backend ni claves secretas.
 
-## Archivos
-- `index.html` — interfaz.
-- `styles.css` — diseño responsive.
-- `app.js` — lógica y datos demo.
-- `README.md` — instrucciones.
+## Publicación en GitHub Pages
+1. Sube todos los archivos de esta carpeta al repositorio.
+2. GitHub → Settings → Pages.
+3. Source: Deploy from a branch.
+4. Branch: main / root.
+5. Save.
+6. Abre la URL que GitHub muestre para Pages.
 
-## GitHub desde el teléfono
-1. Crea un repositorio nuevo en GitHub, por ejemplo `nexo-mvp`.
-2. Sube los cuatro archivos de este ZIP a la raíz del repositorio.
-3. En GitHub abre **Settings → Pages**.
-4. Selecciona despliegue desde la rama principal (`main`) y carpeta `/root`.
-5. Guarda y espera a que GitHub Pages publique el sitio.
-
-## Usuarios demo
-- admin@nexo.test / admin123
-- carlos@nexo.test / 123456
-- ana@nexo.test / 123456
-- pedro@nexo.test / 123456
-
-## Importante antes de usar dinero real
-Este MVP NO debe utilizarse para procesar dinero real ni datos sensibles. Para producción se necesita:
-- backend y base de datos;
-- contraseñas con hash seguro, nunca en JavaScript/localStorage;
-- autenticación y autorización del lado servidor;
-- proveedor de pagos;
-- registro verificable de órdenes y estados de pago;
-- reversión de comisiones por reembolsos/contracargos;
-- controles antifraude y auditoría;
-- protección de datos;
-- términos, política de privacidad y revisión legal del plan de compensación.
-
-## Prueba rápida
-1. Entra con `carlos@nexo.test / 123456`.
-2. Revisa su código de referido.
-3. Registra una venta.
-4. Cierra sesión y entra como `Administrador`.
-5. Comprueba usuarios y comisiones.
-
-Licencia: uso de prototipo/demo.
+## Importante
+Esta es una versión de prueba. El cálculo de rutas y tarifas es de demostración. Para producción habrá que conectar backend, base de datos, datos reales de transporte, GTFS/GTFS-Realtime, autenticación, GPS de flotas, notificaciones y controles de seguridad.

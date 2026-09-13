@@ -1,124 +1,15 @@
-const KEY="nexo_mvp_v1";
-
-const seed = {
-  users:[
-    {id:"u1",name:"Administrador",email:"admin@nexo.test",password:"admin123",role:"admin",ref:"NEXO-ADMIN",parent:null},
-    {id:"u2",name:"Carlos",email:"carlos@nexo.test",password:"123456",role:"user",ref:"NEXO-CARLOS",parent:"u1"},
-    {id:"u3",name:"Ana",email:"ana@nexo.test",password:"123456",role:"user",ref:"NEXO-ANA",parent:"u2"},
-    {id:"u4",name:"Pedro",email:"pedro@nexo.test",password:"123456",role:"user",ref:"NEXO-PEDRO",parent:"u2"}
-  ],
-  products:[
-    {id:"p1",name:"Producto NEXO 1",price:20},
-    {id:"p2",name:"Producto NEXO 2",price:50},
-    {id:"p3",name:"Producto NEXO 3",price:100}
-  ],
-  sales:[
-    {id:"s1",product:"p2",amount:50,buyer:"Cliente demo",seller:"u3",date:"2026-09-03T12:00:00Z"}
-  ],
-  commissions:[]
-};
-
-function load(){
-  let d=localStorage.getItem(KEY);
-  if(!d){ localStorage.setItem(KEY,JSON.stringify(seed)); d=JSON.stringify(seed); }
-  return JSON.parse(d);
-}
-function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
-let db=load(), currentId=null, mode="login";
-
-const $=id=>document.getElementById(id);
-const money=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(n||0);
-const uid=()=>crypto.randomUUID ? crypto.randomUUID() : "id-"+Date.now()+"-"+Math.random();
-function user(){return db.users.find(u=>u.id===currentId)}
-function directChildren(id){return db.users.filter(u=>u.parent===id)}
-function allDownline(id){
-  const out=[]; const q=[id];
-  while(q.length){const x=q.shift(); const c=directChildren(x); out.push(...c); q.push(...c.map(u=>u.id))}
-  return out;
-}
-function commissionsFor(userId){
-  return db.commissions.filter(c=>c.userId===userId).reduce((s,c)=>s+c.amount,0);
-}
-function saleCommission(sale){
-  const seller=db.users.find(u=>u.id===sale.seller);
-  if(!seller) return [];
-  const rates=[.05,.02,.01], out=[];
-  let node=seller;
-  rates.forEach((rate,i)=>{
-    if(node){
-      const parent=db.users.find(u=>u.id===node.parent);
-      if(parent){
-        out.push({id:uid(),saleId:sale.id,userId:parent.id,level:i+1,rate,amount:+(sale.amount*rate).toFixed(2),date:new Date().toISOString()});
-        node=parent;
-      }
-    }
-  });
-  return out;
-}
-
-function setMode(m){
-  mode=m;
-  $("nameField").classList.toggle("hidden",m!=="register");
-  $("refField").classList.toggle("hidden",m!=="register");
-  $("authSubmit").textContent=m==="register"?"Crear cuenta":"Entrar";
-  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.mode===m));
-  $("authMsg").textContent="";
-}
-document.querySelectorAll(".tab").forEach(x=>x.onclick=()=>setMode(x.dataset.mode));
-
-$("authForm").onsubmit=e=>{
-  e.preventDefault(); db=load();
-  const email=$("email").value.trim().toLowerCase(), password=$("password").value;
-  if(mode==="login"){
-    const u=db.users.find(x=>x.email.toLowerCase()===email && x.password===password);
-    if(!u){$("authMsg").textContent="Correo o contraseña incorrectos.";return}
-    currentId=u.id; render();
-  }else{
-    const name=$("name").value.trim(), ref=$("referral").value.trim().toUpperCase();
-    if(!name){$("authMsg").textContent="Escribe tu nombre.";return}
-    if(db.users.some(x=>x.email.toLowerCase()===email)){ $("authMsg").textContent="Ese correo ya existe.";return}
-    const parent=db.users.find(x=>x.ref===ref);
-    const u={id:uid(),name,email,password,role:"user",ref:"NEXO-"+name.toUpperCase().replace(/[^A-Z0-9]+/g,"").slice(0,12)+"-"+Math.floor(Math.random()*900+100),parent:parent?.id||null};
-    db.users.push(u); save(db); currentId=u.id; render();
-  }
-};
-
-$("logoutBtn").onclick=()=>{currentId=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden");$("logoutBtn").classList.add("hidden")};
-
-$("copyBtn").onclick=async()=>{
-  const text=$("refCode").textContent;
-  try{await navigator.clipboard.writeText(text);$("copyMsg").textContent="Código copiado."}
-  catch{$("copyMsg").textContent="Selecciona y copia el código manualmente."}
-};
-
-$("saleForm").onsubmit=e=>{
-  e.preventDefault(); const amount=Number($("amount").value), seller=$("seller").value, product=$("product").value;
-  if(!(amount>0)){ $("saleMsg").textContent="Monto inválido."; return}
-  const sale={id:uid(),product,amount,buyer:"Cliente demo",seller,date:new Date().toISOString()};
-  db.sales.push(sale); db.commissions.push(...saleCommission(sale)); save(db);
-  $("saleMsg").textContent="Venta confirmada y comisiones calculadas sobre la venta.";
-  $("amount").value=""; render();
-};
-
-function render(){
-  db=load(); const u=user(); if(!u)return;
-  $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("logoutBtn").classList.remove("hidden");
-  $("userName").textContent=u.name; $("roleBadge").textContent=u.role==="admin"?"ADMIN":"MIEMBRO";
-  $("refCode").textContent=u.ref;
-  const mySales=db.sales.filter(s=>s.seller===u.id);
-  $("sales").textContent=money(mySales.reduce((s,x)=>s+x.amount,0));
-  $("commissions").textContent=money(commissionsFor(u.id));
-  $("referralsCount").textContent=directChildren(u.id).length;
-  $("balance").textContent=money(commissionsFor(u.id));
-  $("product").innerHTML=db.products.map(p=>`<option value="${p.id}">${p.name} — ${money(p.price)}</option>`).join("");
-  $("seller").innerHTML=db.users.map(x=>`<option value="${x.id}" ${x.id===u.id?"selected":""}>${x.name}</option>`).join("");
-  $("teamList").innerHTML=directChildren(u.id).map(x=>`<div class="item"><span>${x.name}</span><small>${x.ref}</small></div>`).join("")||'<p class="muted">Aún no tienes referidos directos.</p>';
-  $("salesList").innerHTML=db.sales.slice(-8).reverse().map(s=>{
-    const who=db.users.find(x=>x.id===s.seller)?.name||"—";
-    const p=db.products.find(x=>x.id===s.product)?.name||"Venta";
-    return `<div class="item"><span>${p}<br><small>${who}</small></span><strong>${money(s.amount)}</strong></div>`;
-  }).join("");
-  if(u.role==="admin"){$("adminPanel").classList.remove("hidden");$("adminList").innerHTML=db.users.map(x=>`<div class="item"><span>${x.name}<br><small>${x.email}</small></span><span>${money(commissionsFor(x.id))}</span></div>`).join("")}
-  else $("adminPanel").classList.add("hidden");
-}
-render();
+const places={"Mi ubicación":[10.491,-66.902],"Centro de Caracas":[10.506,-66.914],"Plaza Venezuela":[10.494,-66.879],"Chacao":[10.486,-66.853],"Altamira":[10.497,-66.849],"Sabana Grande":[10.493,-66.873]};
+const demoRoutes=[{name:"Ruta NEXO Express",mode:"🚌",minutes:27,walk:5,price:1.2,color:"",note:"1 transbordo"},{name:"Ruta económica",mode:"🚍",minutes:42,walk:8,price:.75,note:"2 transbordos"},{name:"Ruta con menos caminata",mode:"🚶",minutes:35,walk:2,price:1.5,note:"0 transbordos"},{name:"Ruta combinada",mode:"🚌🚶",minutes:31,walk:6,price:1.1,note:"1 transbordo"}];
+let map,markers=[],lastResults=[];
+const $=id=>document.getElementById(id); const money=n=>`$${n.toFixed(2)}`;
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2200)}
+function initMap(){map=L.map('map').setView([10.491,-66.88],12);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map)}
+function coords(name){return places[name]||places["Mi ubicación"]}
+function renderRoutes(routes){lastResults=routes;$("routeCards").innerHTML=routes.map((r,i)=>`<article class="route card ${i===0?'recommended':''}" data-i="${i}"><div><div class="route-title"><strong>${r.mode} ${r.name}</strong>${i===0?'<span class="tag">RECOMENDADA</span>':''}</div><div class="route-meta"><span>⏱️ ${r.minutes} min</span><span>🚶 ${r.walk} min caminando</span><span>🔄 ${r.note}</span></div></div><div><div class="route-price">${money(r.price)}</div><div class="route-arrow">›</div></div></article>`).join('');document.querySelectorAll('.route').forEach(el=>el.onclick=()=>selectRoute(lastResults[+el.dataset.i]))}
+function selectRoute(r){toast(`NEXO: ${r.name} seleccionada · ${r.minutes} min`);$("mapStatus").textContent=`Ruta seleccionada · ${r.minutes} min`;window.location.hash='results'}
+function drawRoute(){markers.forEach(m=>map.removeLayer(m));markers=[];const o=coords($("origin").value.trim()),d=coords($("destination").value.trim());if(!d){toast('Elige un destino primero');return}markers.push(L.marker(o).addTo(map).bindPopup('Origen').openPopup());markers.push(L.marker(d).addTo(map).bindPopup('Destino'));const line=L.polyline([o,d],{weight:5}).addTo(map);markers.push(line);map.fitBounds([o,d],{padding:[30,30]});}
+function search(){const dest=$("destination").value.trim();if(!dest){toast('Escribe o selecciona un destino');$("destination").focus();return}let routes=demoRoutes.map(x=>({...x,minutes:Math.max(12,x.minutes+Math.floor(Math.random()*5)-2)}));renderRoutes(routes);$("results").classList.remove('hidden');drawRoute();$("aiText").textContent=`Para ir a ${dest}, NEXO recomienda ${routes[0].name}: ${routes[0].minutes} minutos aproximadamente. Puedes cambiar la prioridad abajo.`;document.getElementById('results').scrollIntoView({behavior:'smooth'});}
+$("searchBtn").onclick=search;$("clearBtn").onclick=()=>{$("results").classList.add('hidden');$("destination").value='';toast('Búsqueda limpiada')};$("swapBtn").onclick=()=>{const a=$("origin").value,b=$("destination").value;$("origin").value=b||'Mi ubicación';$("destination").value=a==='Mi ubicación'?'':a};document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{$("destination").value=b.dataset.dest;search()});document.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>{const p=b.dataset.ai;let r=[...lastResults];if(!r.length){toast('Primero busca una ruta');return}if(p==='rápido')r.sort((a,b)=>a.minutes-b.minutes);if(p==='barato')r.sort((a,b)=>a.price-b.price);if(p==='caminar')r.sort((a,b)=>a.walk-b.walk);renderRoutes(r);toast(`Priorizando: ${b.textContent.replace(/^.. /,'')}`)});
+$("locateBtn").onclick=()=>{if(!navigator.geolocation){toast('Tu navegador no permite GPS');return}toast('Buscando tu ubicación…');navigator.geolocation.getCurrentPosition(pos=>{const c=[pos.coords.latitude,pos.coords.longitude];places['Mi ubicación']=c;$("origin").value='Mi ubicación';map.setView(c,15);L.marker(c).addTo(map).bindPopup('Tu ubicación').openPopup();toast('Ubicación encontrada')},()=>toast('No se pudo obtener la ubicación'))};$("menuBtn").onclick=()=>$("drawer").classList.remove('hidden');$("closeMenu").onclick=()=>$("drawer").classList.add('hidden');$("resetBtn").onclick=()=>{localStorage.removeItem('nexo2');location.reload()};
+try{initMap()}catch(e){$("mapStatus").textContent='Mapa requiere conexión a internet'};
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
