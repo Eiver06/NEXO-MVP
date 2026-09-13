@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>NEXO — MVP</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">NEXO</div>
+  <button id="logoutBtn" class="btn ghost hidden">Salir</button>
+</header>
+
+<main class="container">
+  <section id="authView" class="card auth">
+    <h1>Construye. Vende. Conecta.</h1>
+    <p class="muted">MVP de NEXO basado en ventas reales y referidos.</p>
+    <div class="tabs">
+      <button class="tab active" data-mode="login">Entrar</button>
+      <button class="tab" data-mode="register">Crear cuenta</button>
+    </div>
+
+    <form id="authForm">
+      <div id="nameField" class="field hidden">
+        <label>Nombre</label><input id="name" autocomplete="name">
+      </div>
+      <div class="field">
+        <label>Correo</label><input id="email" type="email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Contraseña</label><input id="password" type="password" required autocomplete="current-password">
+      </div>
+      <div id="refField" class="field hidden">
+        <label>Código de referido (opcional)</label><input id="referral" placeholder="Ej. NEXO-CARLOS">
+      </div>
+      <button class="btn primary" type="submit" id="authSubmit">Entrar</button>
+      <p id="authMsg" class="msg"></p>
+    </form>
+    <details class="demo">
+      <summary>Usuarios de demostración</summary>
+      <p>admin@nexo.test / admin123</p>
+      <p>carlos@nexo.test / 123456</p>
+      <p>ana@nexo.test / 123456</p>
+      <p>pedro@nexo.test / 123456</p>
+    </details>
+  </section>
+
+  <section id="appView" class="hidden">
+    <div class="welcome">
+      <div><span class="muted">Hola,</span> <strong id="userName"></strong></div>
+      <span id="roleBadge" class="badge"></span>
+    </div>
+
+    <div class="stats">
+      <div class="stat card"><span>Ventas</span><strong id="sales">$0.00</strong></div>
+      <div class="stat card"><span>Comisiones</span><strong id="commissions">$0.00</strong></div>
+      <div class="stat card"><span>Referidos</span><strong id="referralsCount">0</strong></div>
+      <div class="stat card"><span>Balance</span><strong id="balance">$0.00</strong></div>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Tu enlace</h2>
+        <p class="muted">Comparte tu código para atribuir ventas a tu red.</p>
+        <div class="copyrow"><code id="refCode">—</code><button id="copyBtn" class="btn">Copiar</button></div>
+        <p id="copyMsg" class="msg"></p>
+      </section>
+
+      <section class="card">
+        <h2>Registrar venta demo</h2>
+        <p class="muted">La comisión se calcula solo cuando existe una venta.</p>
+        <form id="saleForm">
+          <div class="field"><label>Producto</label><select id="product"></select></div>
+          <div class="field"><label>Monto</label><input id="amount" type="number" min="1" step="0.01" required></div>
+          <div class="field"><label>Vendedor / referido directo</label><select id="seller"></select></div>
+          <button class="btn primary" type="submit">Confirmar venta</button>
+          <p id="saleMsg" class="msg"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Mi red</h2>
+        <div id="teamList" class="list"></div>
+      </section>
+
+      <section class="card">
+        <h2>Últimas ventas</h2>
+        <div id="salesList" class="list"></div>
+      </section>
+    </div>
+
+    <section id="adminPanel" class="card hidden">
+      <h2>Administración</h2>
+      <p class="muted">Vista demo para revisar usuarios y ventas. En producción debe existir backend seguro.</p>
+      <div id="adminList" class="list"></div>
+    </section>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
