@@ -1,22 +1,36 @@
-# NEXO 2.1 — Prototipo funcional
+# NEXO 2.2
 
-NEXO 2.1 mantiene el prototipo PWA de NEXO y añade un **motor de rutas viales por calles reales en modo experimental**, usando OSRM para calcular rutas desde las coordenadas disponibles.
+NEXO 2.2 es el prototipo móvil de NEXO para pruebas en GitHub Pages.
 
-## Incluye
-- Buscador origen/destino con destinos de demostración.
-- Rutas viales sobre calles reales cuando el servicio de routing responde.
-- Hasta varias alternativas de ruta cuando están disponibles.
-- Distancia y tiempo calculados por el motor vial.
-- Mapa OpenStreetMap + Leaflet.
-- Geolocalización del teléfono cuando el navegador lo permite.
-- Prioridades de NEXO IA: rápido, económico y menos caminata.
-- Fallback automático a datos demo si el motor vial no responde.
-- PWA instalable.
+## Cambio principal de esta versión
+
+La versión anterior podía caer a una línea recta cuando el motor OSRM no respondía. NEXO 2.2 elimina ese comportamiento engañoso.
+
+Ahora:
+1. Intenta calcular la ruta con **Valhalla**, usando la red de calles de OpenStreetMap.
+2. Si Valhalla no responde, intenta **OSRM**.
+3. Si ninguno responde, muestra un aviso y **no dibuja una línea recta como si fuera una ruta real**.
+
+Valhalla documenta su servidor público de demostración y su API de rutas; el uso público está sujeto a límites de uso razonable. Para producción NEXO deberá usar un backend/motor de rutas propio o un proveedor con contrato y límites definidos.
+
+## Cómo actualizar GitHub
+
+Sube y reemplaza en la raíz del repositorio:
+- index.html
+- app.js
+- styles.css
+- manifest.webmanifest
+- sw.js
+- icon.svg
+- README.md
+
+Después espera a que GitHub Pages publique el cambio.
 
 ## Importante
-Esta versión sigue siendo un prototipo. OSRM se usa para pruebas y no debe considerarse todavía infraestructura de producción. Para NEXO real necesitaremos un backend propio, proveedor/instancia de routing, datos GTFS/GTFS-Realtime, base de datos, autenticación, monitoreo, límites de uso y seguridad.
 
-La búsqueda de direcciones todavía no usa un servicio público de geocodificación automática. Esto se deja para una fase posterior con un proveedor adecuado o infraestructura propia.
+Esta versión todavía es un prototipo de **rutas viales**, no un sistema de transporte público en tiempo real. La siguiente etapa debe integrar GTFS/GTFS-Realtime, backend, usuarios, GPS de flota y rutas multimodales.
 
-## Publicar en GitHub Pages
-Sube los archivos de esta carpeta a la raíz del repositorio y conserva `index.html` en la raíz.
+Fuentes técnicas:
+- Valhalla: https://valhalla.github.io/valhalla/
+- API de rutas Valhalla: https://valhalla.github.io/valhalla/api/turn-by-turn/overview/
+- OSRM: https://project-osrm.org/docs/
