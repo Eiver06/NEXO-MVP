@@ -82,6 +82,38 @@ async function realRoadRoutes(o,d){
     }
   }
 }
+
+const transitStops=[
+{name:"Parada Centro",lat:10.506,lon:-66.914,lines:["Línea Centro","Ruta 12"]},
+{name:"Parada Plaza Venezuela",lat:10.494,lon:-66.879,lines:["Línea Centro","Ruta 5"]},
+{name:"Parada Chacao",lat:10.486,lon:-66.853,lines:["Línea Chacao","Ruta 8"]},
+{name:"Parada Altamira",lat:10.497,lon:-66.849,lines:["Línea Chacao","Ruta 8"]},
+{name:"Parada Sabana Grande",lat:10.493,lon:-66.873,lines:["Línea Centro","Ruta 5"]}];
+function nearestStop(c){return transitStops.reduce((b,s)=>{const d=Math.hypot((s.lat-c[0])*111,(s.lon-c[1])*109);return !b||d<b.d?{s,d}:b},null)}
+function makeTransitOptions(o,d){
+ const a=nearestStop(o),b=nearestStop(d);
+ const wa=Math.max(2,Math.round(a.d*60)),wb=Math.max(2,Math.round(b.d*60));
+ const km=Math.max(1,Math.hypot((d[0]-o[0])*111,(d[1]-o[1])*109));
+ const t=Math.max(10,Math.round(km*3.1)+8);
+ return [
+ {name:"Combinada · caminar + bus",mode:"🚶🚌",minutes:t+wa+wb,walk:wa+wb,price:1.2,distanceKm:km,note:`Demo · ${a.s.name} → ${b.s.name}`},
+ {name:"Bus con menos caminata",mode:"🚌",minutes:t+Math.min(wa,4)+Math.min(wb,4),walk:Math.min(wa,4)+Math.min(wb,4),price:1.5,distanceKm:km,note:`Demo · ${a.s.lines[0]}`},
+ {name:"Ruta económica",mode:"🚌",minutes:t+8,walk:wa+wb+4,price:.75,distanceKm:km,note:"Demo · tarifa estimada"}]}
+function showTransitStops(){transitStops.forEach(s=>{const m=L.circleMarker([s.lat,s.lon],{radius:7,weight:2,fillOpacity:.85}).addTo(map);m.bindPopup(`<strong>${s.name}</strong><br>${s.lines.join(" · ")}`);markers.push(m)})}
+async function searchMultimodal(){
+ const dest=$("destination").value.trim();if(!dest){toast("Elige un destino primero");return}
+ const o=coords($("origin").value.trim()),d=coords(dest);
+ $("mapStatus").textContent="Calculando opciones de movilidad…";
+ try{
+  const road=await realRoadRoutes(o,d), transit=makeTransitOptions(o,d);showTransitStops();
+  renderRoutes([...road,...transit]);$("aiText").textContent="NEXO compara la ruta vial con opciones caminar + bus. El transporte público mostrado es demostrativo hasta conectar GTFS real.";
+ }catch(e){
+  clearMap();addEndpoints(o,d);showTransitStops();renderRoutes(makeTransitOptions(o,d));
+  $("aiText").textContent="Opciones de transporte público de demostración. Con GTFS real se sustituirán por recorridos y horarios reales.";
+ }
+ $("results").classList.remove("hidden");$("results").scrollIntoView({behavior:"smooth"});toast("Opciones multimodales listas")
+}
+
 async function search(){
   const dest=$("destination").value.trim();
   if(!dest){toast('Escribe o selecciona un destino');$("destination").focus();return}
@@ -103,10 +135,10 @@ async function search(){
     toast("No se pudo calcular la ruta por calles");
   }
 }
-$("searchBtn").onclick=search;
+$("searchBtn").onclick=searchMultimodal;
 $("clearBtn").onclick=()=>{$("results").classList.add('hidden');$("destination").value='';clearMap();toast('Búsqueda limpiada')};
 $("swapBtn").onclick=()=>{const a=$("origin").value,b=$("destination").value;$("origin").value=b||'Mi ubicación';$("destination").value=a==='Mi ubicación'?'':a};
-document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{$("destination").value=b.dataset.dest;search()});
+document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{$("destination").value=b.dataset.dest;searchMultimodal()});
 document.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>{const p=b.dataset.ai;let r=[...lastResults];if(!r.length){toast('Primero busca una ruta');return}if(p==='rápido')r.sort((a,b)=>a.minutes-b.minutes);if(p==='barato')r.sort((a,b)=>a.price-b.price);if(p==='caminar')r.sort((a,b)=>a.walk-b.walk);renderRoutes(r);toast(`Priorizando: ${b.textContent.replace(/^.. /,'')}`)});
 $("locateBtn").onclick=()=>{if(!navigator.geolocation){toast('Tu navegador no permite GPS');return}toast('Buscando tu ubicación…');navigator.geolocation.getCurrentPosition(pos=>{const c=[pos.coords.latitude,pos.coords.longitude];places['Mi ubicación']=c;$("origin").value='Mi ubicación';map.setView(c,15);L.marker(c).addTo(map).bindPopup('Tu ubicación').openPopup();toast('Ubicación encontrada')},()=>toast('No se pudo obtener la ubicación'))};
 $("menuBtn").onclick=()=>$("drawer").classList.remove('hidden');$("closeMenu").onclick=()=>$("drawer").classList.add('hidden');$("resetBtn").onclick=()=>{localStorage.removeItem('nexo2');location.reload()};

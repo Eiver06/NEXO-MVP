@@ -1,4 +1,4 @@
-# NEXO 2.2
+# NEXO 2.3
 
 NEXO 2.2 es el prototipo móvil de NEXO para pruebas en GitHub Pages.
 
@@ -34,3 +34,7 @@ Fuentes técnicas:
 - Valhalla: https://valhalla.github.io/valhalla/
 - API de rutas Valhalla: https://valhalla.github.io/valhalla/api/turn-by-turn/overview/
 - OSRM: https://project-osrm.org/docs/
+
+
+## NEXO 2.3
+Añade una primera capa multimodal: ruta vial + caminar + bus y paradas demostrativas. Las opciones de transporte público son DEMO hasta integrar GTFS/GTFS-Realtime real.
