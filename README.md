@@ -1,40 +1,18 @@
-# NEXO 2.3
+# NEXO 2.4
 
-NEXO 2.2 es el prototipo móvil de NEXO para pruebas en GitHub Pages.
+NEXO 2.4 corrige la selección interactiva de rutas: al tocar cualquier opción, el mapa elimina la ruta anterior y dibuja la geometría de la ruta seleccionada.
 
-## Cambio principal de esta versión
-
-La versión anterior podía caer a una línea recta cuando el motor OSRM no respondía. NEXO 2.2 elimina ese comportamiento engañoso.
-
-Ahora:
-1. Intenta calcular la ruta con **Valhalla**, usando la red de calles de OpenStreetMap.
-2. Si Valhalla no responde, intenta **OSRM**.
-3. Si ninguno responde, muestra un aviso y **no dibuja una línea recta como si fuera una ruta real**.
-
-Valhalla documenta su servidor público de demostración y su API de rutas; el uso público está sujeto a límites de uso razonable. Para producción NEXO deberá usar un backend/motor de rutas propio o un proveedor con contrato y límites definidos.
-
-## Cómo actualizar GitHub
-
-Sube y reemplaza en la raíz del repositorio:
-- index.html
-- app.js
-- styles.css
-- manifest.webmanifest
-- sw.js
-- icon.svg
-- README.md
-
-Después espera a que GitHub Pages publique el cambio.
+## Incluye
+- Rutas por calles reales con OSRM.
+- Alternativas de conducción.
+- Opciones demo de transporte público.
+- Selección de ruta sincronizada con el mapa.
+- Marcadores de origen y destino.
+- PWA instalable.
+- Fallback sin línea recta falsa cuando el enrutador falla.
 
 ## Importante
+Las opciones de transporte público siguen siendo demostrativas. Para una versión real se integrarán GTFS/GTFS-Realtime, backend propio, GPS de vehículos y datos de operación.
 
-Esta versión todavía es un prototipo de **rutas viales**, no un sistema de transporte público en tiempo real. La siguiente etapa debe integrar GTFS/GTFS-Realtime, backend, usuarios, GPS de flota y rutas multimodales.
-
-Fuentes técnicas:
-- Valhalla: https://valhalla.github.io/valhalla/
-- API de rutas Valhalla: https://valhalla.github.io/valhalla/api/turn-by-turn/overview/
-- OSRM: https://project-osrm.org/docs/
-
-
-## NEXO 2.3
-Añade una primera capa multimodal: ruta vial + caminar + bus y paradas demostrativas. Las opciones de transporte público son DEMO hasta integrar GTFS/GTFS-Realtime real.
+## GitHub Pages
+Sube todos los archivos a la raíz del repositorio y publica GitHub Pages desde la rama principal y la carpeta raíz.
