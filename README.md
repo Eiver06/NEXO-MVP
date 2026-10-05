@@ -1,18 +1,22 @@
-# NEXO 2.4
+# NEXO 2.5
 
-NEXO 2.4 corrige la selección interactiva de rutas: al tocar cualquier opción, el mapa elimina la ruta anterior y dibuja la geometría de la ruta seleccionada.
+NEXO 2.5 avanza de la maqueta de transporte público hacia una arquitectura preparada para GTFS.
 
 ## Incluye
 - Rutas por calles reales con OSRM.
-- Alternativas de conducción.
-- Opciones demo de transporte público.
 - Selección de ruta sincronizada con el mapa.
+- Transporte público separado en `gtfs-demo.json`.
+- Estructura GTFS de agencias, paradas y rutas.
+- Alternativas multimodales: caminar + transporte público + carretera.
+- Tramos de caminata y transporte diferenciados en el mapa.
 - Marcadores de origen y destino.
 - PWA instalable.
-- Fallback sin línea recta falsa cuando el enrutador falla.
 
 ## Importante
-Las opciones de transporte público siguen siendo demostrativas. Para una versión real se integrarán GTFS/GTFS-Realtime, backend propio, GPS de vehículos y datos de operación.
+`gtfs-demo.json` contiene datos de demostración con estructura compatible conceptualmente con GTFS; todavía no representa una red operativa real. El siguiente paso es conectar un feed GTFS real de la ciudad objetivo y posteriormente GTFS-Realtime.
+
+## Próximo bloque
+NEXO 2.6: ingestión de GTFS real, normalización de paradas/rutas y selección multimodal basada en datos reales. Después: NEXO 3.0 con backend, base de datos, usuarios y viajes.
 
 ## GitHub Pages
 Sube todos los archivos a la raíz del repositorio y publica GitHub Pages desde la rama principal y la carpeta raíz.

@@ -1,0 +1,16 @@
+{
+  "agency": {"id":"nexo-demo","name":"NEXO Transporte Demo"},
+  "stops":[
+    {"id":"CEN","name":"Parada Centro","lat":10.506,"lon":-66.914},
+    {"id":"SAB","name":"Sabana Grande","lat":10.493,"lon":-66.873},
+    {"id":"PVZ","name":"Plaza Venezuela","lat":10.494,"lon":-66.879},
+    {"id":"CHA","name":"Chacao","lat":10.486,"lon":-66.853},
+    {"id":"ALT","name":"Altamira","lat":10.497,"lon":-66.849}
+  ],
+  "routes":[
+    {"id":"R1","short_name":"L1","long_name":"Línea Centro","type":"bus","fare":0.75,"stops":["CEN","SAB","PVZ"],"shape":[[10.506,-66.914],[10.500,-66.900],[10.496,-66.887],[10.493,-66.873],[10.494,-66.879]]},
+    {"id":"R2","short_name":"R12","long_name":"Ruta 12","type":"bus","fare":1.10,"stops":["CEN","PVZ","CHA"],"shape":[[10.506,-66.914],[10.501,-66.900],[10.494,-66.879],[10.490,-66.866],[10.486,-66.853]]},
+    {"id":"R3","short_name":"R5","long_name":"Ruta 5","type":"bus","fare":0.65,"stops":["PVZ","SAB","CHA"],"shape":[[10.494,-66.879],[10.493,-66.873],[10.490,-66.862],[10.486,-66.853]]},
+    {"id":"R4","short_name":"LCH","long_name":"Línea Chacao","type":"bus","fare":1.25,"stops":["PVZ","CHA","ALT"],"shape":[[10.494,-66.879],[10.490,-66.866],[10.486,-66.853],[10.492,-66.850],[10.497,-66.849]]}
+  ]
+}
